@@ -5,18 +5,11 @@ import requests
 import csv
 from pathlib import Path
 import os
+import re
 
-def day_finder(text):
-    days = []
-    for i in range(len(text)):
-        if text[i] == '(':
-            word = text[i + 1:]
-            for j in range(len(word)):
-                if word[j] == ')':
-                    word = word[:j] 
-                    days.append(word)
-                    break
-    return days
+def re_day_finder(text):
+    matches = [match.strip("()") for match in re.findall(r"\([MTWRF]+\)", text)]  # <action> for <var> in <list>
+    return matches
 
 def trimmer(text):
     for i in range(len(text)):
@@ -51,7 +44,7 @@ for table in parser.find_all('table'):
         # Contains all exam info needed, first value is regular class start time, second value is what days the class regularly meets, third value is the time block for the final
         tdlist = tr.find_all('td')
         class_start = tdlist[0].text 
-        class_day = day_finder(tdlist[1].text) 
+        class_day = re_day_finder(tdlist[1].text) 
         exam_start = tdlist[2].text 
 
         if class_start in class_list:
