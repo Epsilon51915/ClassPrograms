@@ -26,17 +26,15 @@ def trimmer(text):
 
 class_list = []
 final_list = []
-test_list = []
-td_list = []
 
 script_path = os.path.abspath(__file__) #Gives path to script file
 script_dir = os.path.dirname(script_path) # Gets directory that script resides in
 
-with open(Path(script_dir) / 'Input' / 'classes.csv', mode = 'r') as csvr: # Path() overloads '/' operator into acting as file slash
+with open(Path(script_dir) / 'Input' / 'classes.csv') as csvr: # Path() overloads '/' operator into acting as file slash #mode = 'r' is default for open()
     csvread = csv.reader(csvr)
     for row in csvread:
         for string in row:
-            if(string.find("Class") == False):
+            if not string.find("Class"):
                 continue
             class_list.append(string)
 
@@ -45,8 +43,6 @@ source = "https://www.unr.edu/admissions/records/academic-calendar/finals-schedu
 request = requests.get(source)
 
 parser = BeautifulSoup(request.text, 'html.parser')
-caption = ""
-text = ""
 for table in parser.find_all('table'):
     # Displays the day of the final, though this can likely be overridden in favor of a counter which contains the exam day (i.e, 1 is thursday, 2 is friday...)
     caption = trimmer(table.find('caption').text)
@@ -58,19 +54,19 @@ for table in parser.find_all('table'):
         class_day = day_finder(tdlist[1].text) 
         exam_start = tdlist[2].text 
 
-        if (class_start in class_list):
+        if class_start in class_list:
             index = class_list.index(class_start)
             seconds = 0
             try:
                 seconds = class_list.index(class_start, index + 1)
             except ValueError:
                 seconds = 0
-            if(class_list[index + 1] in class_day):
+            if class_list[index + 1] in class_day:
                 final_list.append(class_list[index + 2])
                 final_list.append(caption)
                 final_list.append(exam_start)
-            if(seconds != 0):
-                if(class_list[seconds + 1] in class_day):
+            if seconds != 0:
+                if class_list[seconds + 1] in class_day:
                     final_list.append(class_list[seconds + 2])
                     final_list.append(caption)
                     final_list.append(exam_start)
