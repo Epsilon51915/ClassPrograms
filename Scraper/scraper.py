@@ -41,52 +41,34 @@ request = requests.get(source)
 
 parser = BeautifulSoup(request.text, 'html.parser')
 caption = ""
-counter = 1
 text = ""
 for table in parser.find_all('table'):
     # Displays the day of the final, though this can likely be overridden in favor of a counter which contains the exam day (i.e, 1 is thursday, 2 is friday...)
     caption = trimmer(table.find('caption').text)
-    for tbody in table.find_all('tbody'):
-        for tr in tbody.find_all('tr'):
-            # Contains all exam info needed, first value is regular class start time, second value is what days the class regularly meets, third value is the time block for the final
-            counter1 = 0
-            for td in tr.find_all('td'):
+    tbody = table.find('tbody')
+    for tr in tbody.find_all('tr'):
+        # Contains all exam info needed, first value is regular class start time, second value is what days the class regularly meets, third value is the time block for the final
+        tdlist = tr.find_all('td')
+        class_start = tdlist[0].text 
+        class_day = day_finder(tdlist[1].text) 
+        exam_start = tdlist[2].text 
 
-                # Regular class start time  
-                if counter1 % 3 == 0:
-                    text = td.text
-                    td_list.append(text)
-
-                # What days the class meets
-                if counter1 % 3 == 1:
-                    days = day_finder(td.text)
-                    td_list.append(days)
-
-                # Final exam time
-                if counter1 % 3 == 2:
-                    text = td.text
-                    td_list.append(text)
-
-                if (counter % 3 == 0):
-                    if (td_list[0] in class_list):
-                        index = class_list.index(td_list[0])
-                        seconds = 0
-                        try:
-                            seconds = class_list.index(td_list[0], index + 1)
-                        except ValueError:
-                            seconds = 0
-                        if(class_list[index + 1] in td_list[1]):
-                            final_list.append(class_list[index + 2])
-                            final_list.append(caption)
-                            final_list.append(td_list[2])
-                        if(seconds != 0):
-                            if(class_list[seconds + 1] in td_list[1]):
-                                final_list.append(class_list[seconds + 2])
-                                final_list.append(caption)
-                                final_list.append(td_list[2])
-                    td_list.clear()
-                counter = counter + 1
-                counter1 = counter1 + 1
+        if (class_start in class_list):
+            index = class_list.index(class_start)
+            seconds = 0
+            try:
+                seconds = class_list.index(class_start, index + 1)
+            except ValueError:
+                seconds = 0
+            if(class_list[index + 1] in class_day):
+                final_list.append(class_list[index + 2])
+                final_list.append(caption)
+                final_list.append(exam_start)
+            if(seconds != 0):
+                if(class_list[seconds + 1] in class_day):
+                    final_list.append(class_list[seconds + 2])
+                    final_list.append(caption)
+                    final_list.append(exam_start)
 
 print(final_list)
 
@@ -96,8 +78,6 @@ with open('finals.csv', mode = 'w') as output:
     for i in range(len(class_list) // 3):
         csvwrite.writerow([final_list[3*(i-1)],final_list[3*(i-1)+1],final_list[3*(i-1)+2]])
     
-
-
 # Final output: List [First exam class name, first exam day, first exam time, Second exam class name, second exam day, second exam time, ...]
 
 #########################################################################################
