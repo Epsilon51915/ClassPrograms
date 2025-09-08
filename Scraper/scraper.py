@@ -3,6 +3,8 @@
 from bs4 import BeautifulSoup
 import requests
 import csv
+from pathlib import Path
+import os
 
 def day_finder(text):
     days = []
@@ -27,7 +29,10 @@ final_list = []
 test_list = []
 td_list = []
 
-with open('classes.csv', mode = 'r') as csvr:
+script_path = os.path.abspath(__file__) #Gives path to script file
+script_dir = os.path.dirname(script_path) # Gets directory that script resides in
+
+with open(Path(script_dir) / 'Input' / 'classes.csv', mode = 'r') as csvr: # Path() overloads '/' operator into acting as file slash
     csvread = csv.reader(csvr)
     for row in csvread:
         for string in row:
@@ -72,7 +77,8 @@ for table in parser.find_all('table'):
 
 print(final_list)
 
-with open('finals.csv', mode = 'w') as output:
+os.makedirs(Path(script_dir) / 'Output', exist_ok=True) # Creates the Output folder, exist_ok allows for function after the folder already exists
+with open(Path(script_dir) / 'Output' / 'finals.csv', mode = 'w') as output:
     csvwrite = csv.writer(output)
     csvwrite.writerow(['Class','Exam Day','Exam Time'])
     for i in range(len(class_list) // 3):
